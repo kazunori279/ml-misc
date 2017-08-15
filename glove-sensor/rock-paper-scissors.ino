@@ -1,8 +1,11 @@
 //
-// rock-paper-scissors
+// rock-paper-scissors Arduino code
 //
 
-// logistic regression parameters
+//
+// parameters copied from TensorFlow code
+//
+
 float weights[3][3] = {
   {3.007032,-9.370312,6.363242},
   {10.726093,-0.494137,-10.231989},
@@ -12,6 +15,10 @@ float weights[3][3] = {
 float biases[3] = {-5.709740,6.722741,-1.013021};
 
 float scaling[3] = {0.000978,0.001600,0.001160};
+
+//
+// main
+//
 
 // setup
 void setup() {
