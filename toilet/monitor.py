@@ -3,7 +3,7 @@
 #
 
 import time
-import classify
+import predict
 from picamera import PiCamera
 from picamera.exc import PiCameraRuntimeError
 from grovepi import *
@@ -23,7 +23,7 @@ def buzz():
 
 # init models
 print('Init models...')
-classify.init_models()
+predict.init_models()
 
 # init I/O and camera
 pinMode(LIGHT, 'INPUT')
@@ -51,7 +51,7 @@ while(True):
     print('Camera error')
 
   # classify 
-  is_wet = classify.classify()
+  is_wet = predict.predict()
   print('is_wet: ' + str(is_wet))
   if(is_wet):
     digitalWrite(LED, 1)
