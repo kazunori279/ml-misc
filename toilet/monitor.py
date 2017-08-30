@@ -1,5 +1,7 @@
 #
 # monitor.py
+# 
+# when the toilet isn't dark, takes a picture and check if the floor is wet. 
 #
 
 import time
@@ -39,7 +41,7 @@ while(True):
   digitalWrite(LED, 0)
   digitalWrite(BUZZ, 0)
 
-  # wait until someone get's in the toilet
+  # do nothing when the toilet is dark
   if (analogRead(LIGHT) < 100):
     time.sleep(0.1)
     continue
@@ -50,7 +52,7 @@ while(True):
   except PiCameraRuntimeError:
     print('Camera error')
 
-  # classify 
+  # get probability of wet floor 
   wet_prob = predict.predict()
   print('wet prob: ' + str(wet_prob))
   if(wet_prob > 0.2):

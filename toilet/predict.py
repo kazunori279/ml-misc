@@ -1,6 +1,8 @@
 #
 # predict.py
 #
+# checks the captured picture to calculate probability of wet floor
+#
 
 from keras import applications, optimizers
 from keras.preprocessing import image

@@ -1,3 +1,7 @@
+#
+# camera.py: for collecting training data
+#
+
 import time
 from picamera import PiCamera
 
@@ -7,3 +11,4 @@ while(True):
   filename = str(time.time()) + '.jpg'
   camera.capture(filename)
   print(filename)
+
