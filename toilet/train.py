@@ -12,13 +12,13 @@ img_width, img_height = 150, 150
 
 train_data_dir = 'data/train'
 validation_data_dir = 'data/validation'
-nb_train_samples = 475 
-nb_validation_samples = 52 
-epochs = 500
-batch_size = 50 
+nb_train_samples = 1208
+nb_validation_samples = 332 
+epochs = 500 
+batch_size = 32 
 
 # build the VGG16 network
-base_model = applications.VGG16(weights='imagenet', include_top=False, input_shape=(150,150,3))
+base_model = applications.VGG16(weights='imagenet', include_top=False, input_shape=(150, 150,3))
 print('Model loaded.')
 
 # build a classifier model to put on top of the convolutional model
