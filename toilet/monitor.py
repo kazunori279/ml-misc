@@ -51,9 +51,9 @@ while(True):
     print('Camera error')
 
   # classify 
-  is_wet = predict.predict()
-  print('is_wet: ' + str(is_wet))
-  if(is_wet):
+  wet_prob = predict.predict()
+  print('wet prob: ' + str(wet_prob))
+  if(wet_prob > 0.2):
     digitalWrite(LED, 1)
     buzz()
 
