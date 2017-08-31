@@ -42,9 +42,9 @@ while(True):
   digitalWrite(BUZZ, 0)
 
   # do nothing when the toilet is dark
-  if (analogRead(LIGHT) < 100):
+  while (analogRead(LIGHT) < 100):
     time.sleep(0.1)
-    continue
+  time.sleep(1) # wait until stabilizing camera
 
   # capture 
   try:
@@ -55,7 +55,7 @@ while(True):
   # get probability of wet floor 
   wet_prob = predict.predict()
   print('wet prob: ' + str(wet_prob))
-  if(wet_prob > 0.2):
+  if(wet_prob > 0.5):
     digitalWrite(LED, 1)
     buzz()
 
