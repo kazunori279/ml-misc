@@ -1,3 +1,11 @@
+#
+# train.py
+#
+# uses VGG16 and an additional FC layer for finetune the model.
+# based on saulthu's comment on:
+# https://gist.github.com/fchollet/7eb39b44eb9e16e59632d25fb3119975
+#
+
 from keras import applications
 from keras.preprocessing.image import ImageDataGenerator
 from keras import optimizers
@@ -5,11 +13,8 @@ from keras.models import Sequential
 from keras.models import Model
 from keras.layers import Dropout, Flatten, Dense
 
-# path to the model weights files.
-#weights_path = '../keras/examples/vgg16_weights.h5'
 top_model_weights_path = 'bottleneck_fc_model.h5'
 img_width, img_height = 150, 150 
-
 train_data_dir = 'data/train'
 validation_data_dir = 'data/validation'
 nb_train_samples = 1208
@@ -17,24 +22,19 @@ nb_validation_samples = 332
 epochs = 500 
 batch_size = 32 
 
-# build the VGG16 network
+# VGG16 base model 
 base_model = applications.VGG16(weights='imagenet', include_top=False, input_shape=(150, 150,3))
 print('Model loaded.')
 
-# build a classifier model to put on top of the convolutional model
+# top model 
 top_model = Sequential()
 top_model.add(Flatten(input_shape=base_model.output_shape[1:]))
 top_model.add(Dense(256, activation='relu'))
 top_model.add(Dropout(0.5))
 top_model.add(Dense(1, activation='sigmoid'))
-
-# note that it is necessary to start with a fully-trained
-# classifier, including the top classifier,
-# in order to successfully do fine-tuning
 top_model.load_weights(top_model_weights_path)
 
-# add the model on top of the convolutional base
-# model.add(top_model)
+# full model = VGG16 + top_model  
 model = Model(inputs=base_model.input, outputs=top_model(base_model.output))
 
 # set the first 25 layers (up to the last conv block)
@@ -80,6 +80,7 @@ model.fit_generator(
     validation_steps=nb_validation_samples // batch_size,
     verbose=2)
 
+# save the full model
 model.save_weights('full_model.h5')
 print('Model saved.')
 
