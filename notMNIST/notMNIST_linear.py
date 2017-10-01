@@ -4,8 +4,11 @@ import re
 from google.cloud import storage
 
 GCS_BUCKET = "gcp-samples2-misc"
-GCS_DATA_DIR = "notMNIST_large"
-EPOCH = 10000
+# GCS_DATA_DIR = "notMNIST_large_test"
+GCS_DATA_DIR = "notMNIST_small"
+#GCS_DATA_DIR = "notMNIST_large"
+TRAIN_STEPS = 100
+TRAIN_BATCH_SIZE = 10
 
 def list_files_and_labels(): 
   file_list = []
@@ -42,9 +45,9 @@ def create_dataset():
 
   dataset = tf.contrib.data.Dataset.from_tensor_slices((files_const, labels_const))
   dataset = dataset.map(_parse_function)
-  dataset = dataset.shuffle(buffer_size=10000)
-  dataset = dataset.batch(100)
-  dataset = dataset.repeat(EPOCH)
+#  dataset = dataset.shuffle(buffer_size=10000)
+  dataset = dataset.batch(TRAIN_BATCH_SIZE)
+  dataset = dataset.repeat(TRAIN_STEPS)
   return dataset
 
 # define model
@@ -66,7 +69,7 @@ def model_fn(features, labels, mode):
   # loss and optimizer
   loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits_layer)
   optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
-  train_op = optimizer.minimize(loss=loss)
+  train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
   if mode == tf.estimator.ModeKeys.TRAIN:
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
@@ -75,10 +78,17 @@ def model_fn(features, labels, mode):
     "accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])}
   return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metrics_ops)
 
-# prepare dataset
+# input_fn for training 
 dataset = None
-def dataset_input_fn():
+def train_input_fn():
+  global dataset
+  iterator = dataset.make_one_shot_iterator()
+  features, labels = iterator.get_next()
+  return features, labels 
 
+# input_fn for eval
+def eval_input_fn():
+  global dataset
   iterator = dataset.make_one_shot_iterator()
   features, labels = iterator.get_next()
   return features, labels 
@@ -86,24 +96,25 @@ def dataset_input_fn():
 # main
 def main(argv):
  
-#  sess = tf_debug.LocalCLIDebugWrapperSession(tf.Session())
-
   # logging
-  logging_hook = tf.train.LoggingTensorHook(tensors={"probabilities": "softmax_tensor"}, every_n_iter=50)
+  tf.logging.set_verbosity(tf.logging.INFO)
+  log_hook = tf.train.LoggingTensorHook(tensors={"probabilities": "softmax_tensor"}, every_n_iter=50)
+  # debug_hook = tf_debug.LocalCLIDebugHook()
 
   # read dataset 
   global dataset
-  print("creating dataset...")
+  print("\ncreating dataset...")
   dataset = create_dataset()
 
   # train
-  print("training...")
+  print("\ntraining...")
   estimator = tf.estimator.Estimator(model_fn=model_fn, model_dir="/tmp/model")
-  estimator.train(input_fn=dataset_input_fn, steps=EPOCH, hooks=[logging_hook])
+  estimator.train(input_fn=train_input_fn, steps=TRAIN_STEPS, hooks=[log_hook])
+  quit()
 
   # evaluate
-  print("evaluating...")
-  eval_resuts = estimator.evaluate(input_fn=dataset_input_fn)
+  print("\nevaluating...")
+  eval_resuts = estimator.evaluate(input_fn=eval_input_fn)
   print(eval_results)
 
 
